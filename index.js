@@ -9,19 +9,26 @@ require('dotenv').config()
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-
-
-
+app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.MONGOBD_USERNAME}:${process.env.MONGOBD_PASSWORD}@cluster0.kbyx5ha.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri)
+
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
-function run (){
+async function run(){
      try{
+          const postsCollections = client.db('mzone').collection('posts');
+
+
+          app.post('/posts', async(req, res)=>{
+               const data = req.body;
+               const result = await postsCollections.insertOne(data)
+               res.send(result)
+               console.log(data)
+          })
 
      }
      finally{
