@@ -22,37 +22,45 @@ async function run(){
      try{
           const postsCollections = client.db('mzone').collection('posts');
           const usersCollections = client.db('mzone').collection('users');
+          const commentCollections = client.db('mzone').collection('comment');
 
           // get all post data 
           app.get('/posts', async(req, res)=>{
-               const queary = {}
-               const result = await postsCollections.find(queary).toArray()
+               const query = {}
+               const result = await postsCollections.find(query).toArray()
                res.send(result)
           })
 
-          // get each data with id
-          app.get('/postDetails/:id', async(req, res)=>{
+          // get each post data with id
+          app.get('/posts/:id', async(req, res)=>{
                const id = req.params.id;
-               const queary = {_id : ObjectId(id)}
-               const result = await postsCollections.find(queary).toArray()
+               const query = {_id : ObjectId(id)}
+               const result = await postsCollections.findOne(query)
                res.send(result)
           })
 
-          // get user information 
+          // get each user information 
           app.get('/user', async (req, res)=>{
                const email = req.query.email;
-               const queary = { email: email}
-               const result = await usersCollections.find(queary).toArray()
+               const query = { email: email}
+               const result = await usersCollections.findOne(query)
                res.send(result)
 
+          })
+
+          // get all comment 
+          app.get('/comment', async(req, res)=> {
+               const query = {}
+               const result = await commentCollections.find(query).toArray()
+               res.send(result)
           })
 
 
           // user information send to mongodb
           app.post('/users', async(req, res)=>{
                const user = req.body;
-               const queary = {email: user.email}
-               const cursor = await usersCollections.findOne(queary)
+               const query = {email: user.email}
+               const cursor = await usersCollections.findOne(query)
                if(cursor){
                     return;
                }
@@ -64,6 +72,13 @@ async function run(){
           app.post('/posts', async(req, res)=>{
                const post = req.body;
                const result = await postsCollections.insertOne(post)
+               res.send(result)
+          })
+
+          // post comment information 
+          app.post('/comment', async(req, res)=>{
+               const comment = req.body;
+               const result = await commentCollections.insertOne(comment)
                res.send(result)
           })
 
