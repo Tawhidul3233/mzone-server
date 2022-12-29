@@ -7,7 +7,7 @@ app.use(cors());
 
 require('dotenv').config()
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use(express.json());
 
@@ -21,13 +21,50 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
      try{
           const postsCollections = client.db('mzone').collection('posts');
+          const usersCollections = client.db('mzone').collection('users');
 
-
-          app.post('/posts', async(req, res)=>{
-               const data = req.body;
-               const result = await postsCollections.insertOne(data)
+          // get all post data 
+          app.get('/posts', async(req, res)=>{
+               const queary = {}
+               const result = await postsCollections.find(queary).toArray()
                res.send(result)
-               console.log(data)
+          })
+
+          // get each data with id
+          app.get('/postDetails/:id', async(req, res)=>{
+               const id = req.params.id;
+               const queary = {_id : ObjectId(id)}
+               const result = await postsCollections.find(queary).toArray()
+               res.send(result)
+          })
+
+          // get user information 
+          app.get('/user', async (req, res)=>{
+               const email = req.query.email;
+               const queary = { email: email}
+               const result = await usersCollections.find(queary).toArray()
+               res.send(result)
+
+          })
+
+
+          // user information send to mongodb
+          app.post('/users', async(req, res)=>{
+               const user = req.body;
+               const queary = {email: user.email}
+               const cursor = await usersCollections.findOne(queary)
+               if(cursor){
+                    return;
+               }
+               const result = await usersCollections.insertOne(user)
+               res.send(result)
+          })
+
+          // post all post data 
+          app.post('/posts', async(req, res)=>{
+               const post = req.body;
+               const result = await postsCollections.insertOne(post)
+               res.send(result)
           })
 
      }
