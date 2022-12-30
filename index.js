@@ -63,6 +63,13 @@ async function run(){
                res.send(result)
           })
 
+          // get top post 
+          app.get('/topposts', async(req, res)=>{
+               const query = {}
+               const result = await postsCollections.find(query).sort({like:-1}).limit(3).toArray()
+               res.send(result)
+          })
+
 
           // user information send to mongodb
           app.post('/users', async(req, res)=>{
@@ -99,6 +106,39 @@ async function run(){
           app.post('/comment', async(req, res)=>{
                const comment = req.body;
                const result = await commentCollections.insertOne(comment)
+               res.send(result)
+          })
+
+
+
+
+          // update post for send like amount update 
+          app.put('/posts/:id', async(req, res)=>{
+               const id = req.params.id;
+               const like = req.body;
+               const filter = {_id : ObjectId(id)};
+               const option = { upsert: true};
+               const updateDoc = {
+                    $set:{
+                         like : like
+                    }
+               }
+               const result = await postsCollections.updateOne(filter, updateDoc, option)
+               res.send(result)
+          })
+
+          //  update post for send comment amount update 
+          app.put('/comment/:id', async(req, res)=>{
+               const id = req.params.id;
+               const comment = req.body;
+               const filter = {_id : ObjectId(id)};
+               const option = { upsert: true};
+               const updateDoc = {
+                    $set:{
+                         comment : comment
+                    }
+               }
+               const result = await postsCollections.updateOne(filter, updateDoc, option)
                res.send(result)
           })
 
