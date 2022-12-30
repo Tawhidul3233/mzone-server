@@ -23,6 +23,7 @@ async function run(){
           const postsCollections = client.db('mzone').collection('posts');
           const usersCollections = client.db('mzone').collection('users');
           const commentCollections = client.db('mzone').collection('comment');
+          const likeCollections = client.db('mzone').collection('like');
 
           // get all post data 
           app.get('/posts', async(req, res)=>{
@@ -55,6 +56,13 @@ async function run(){
                res.send(result)
           })
 
+          // get all like 
+          app.get('/like', async(req, res)=>{
+               const query = {}
+               const result = await likeCollections.find(query).toArray()
+               res.send(result)
+          })
+
 
           // user information send to mongodb
           app.post('/users', async(req, res)=>{
@@ -65,6 +73,18 @@ async function run(){
                     return;
                }
                const result = await usersCollections.insertOne(user)
+               res.send(result)
+          })
+
+          // like information send mongodb
+          app.post('/like', async(req, res)=> {
+               const like = req.body;
+               const query = {$and:[{email: like.email}, {id: like.id}]}
+               const cursor = await likeCollections.findOne(query)
+               if(cursor){
+                    return;
+               }
+               const result = await likeCollections.insertOne(like)
                res.send(result)
           })
 
